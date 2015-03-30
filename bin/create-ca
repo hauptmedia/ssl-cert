@@ -6,16 +6,18 @@ OPENSSL_CONFIG=${BASEDIR}/../etc/openssl.cnf
 
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
 
-# Initialize our own variables:
-depot_path=$(pwd)
+export DEPOT_DIR=$(pwd)
+export CN=""
 
-while getopts "d:h" opt; do
+while getopts "d:c:h" opt; do
     case "$opt" in
     h|\?)
-    	echo Usage: $0 [-d depot_path]
+    	echo Usage: $0 [-d depot directory]
 	exit 0
         ;;
-    d)  depot_path=$OPTARG
+    c)  CN=$OPTARG
+        ;;
+    d)  DEPOT_DIR=$OPTARG
         ;;
     esac
 done
@@ -24,18 +26,18 @@ shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
 
-if [ -f ${depot_path}/index.txt ]; then
-    echo Directory ${depot_path} is already initialized with a certificate authority. Aborting! 1>&2
+if [ -f ${DEPOT_DIR}/index.txt ]; then
+    echo Directory ${DEPOT_DIR} is already initialized with a certificate authority. Aborting! 1>&2
     exit 1
 fi
 
-mkdir -p ${depot_path}/private ${depot_path}/certs ${depot_path}/newcerts ${depot_path}/crl
+mkdir -p ${DEPOT_DIR}/private ${DEPOT_DIR}/certs ${DEPOT_DIR}/newcerts ${DEPOT_DIR}/crl
 
-touch ${depot_path}/index.txt
-echo '01' > ${depot_path}/serial
+touch ${DEPOT_DIR}/index.txt
+echo '01' > ${DEPOT_DIR}/serial
 
 openssl req -config ${OPENSSL_CONFIG} -new -x509 -extensions v3_ca \
-  -keyout ${depot_path}/private/ca.key -out ${depot_path}/certs/ca.crt
+  -keyout ${DEPOT_DIR}/private/ca.key -out ${DEPOT_DIR}/certs/ca.crt
 
 if [ $? -ne 0 ]; then
     echo "Could not create certificate authority. Aborting!" 1>&2
@@ -44,6 +46,6 @@ fi
 
 echo
 echo Created certificate authority
-echo Created private key in ${depot_path}/private/ca.key
-echo Created certificate in ${depot_path}/certs/ca.crt
+echo Created private key in ${DEPOT_DIR}/private/ca.key
+echo Created certificate in ${DEPOT_DIR}/certs/ca.crt
 

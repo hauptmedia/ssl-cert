@@ -1,6 +1,6 @@
 # etcd OpenSSL configuration file.
 SAN = "IP:127.0.0.1"
-dir = ${ENV::ETCD_CA_DIR}
+dir = ${ENV::DEPOT_DIR}
 
 [ ca ]
 default_ca = etcd_ca
@@ -46,7 +46,7 @@ countryName_max            = 2
 commonName                 = Common Name (FQDN)
 commonName_default         = ${ENV::CN}
 0.organizationName         = Organization Name (eg, company)
-0.organizationName_default = etcd-ca
+0.organizationName_default = ca
 
 [ req_attributes ]
 

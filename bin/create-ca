@@ -9,12 +9,11 @@ OPTIND=1         # Reset in case getopts has been used previously in the shell.
 # Initialize our own variables:
 depot_path=$(pwd)
 
-while getopts "d:" opt; do
+while getopts "d:h" opt; do
     case "$opt" in
     h|\?)
-        exit 0
-        ;;
-    v)  verbose=1
+    	echo Usage: $0 [-d depot_path]
+	exit 0
         ;;
     d)  depot_path=$OPTARG
         ;;

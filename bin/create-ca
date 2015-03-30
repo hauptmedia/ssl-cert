@@ -2,7 +2,7 @@
 set -e
 
 BASEDIR=$(dirname $0)
-OPENSSL_CONFIG=${BASEDIR}/../conf/openssl.cnf
+OPENSSL_CONFIG=${BASEDIR}/../etc/openssl.cnf
 
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
 

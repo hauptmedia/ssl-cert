@@ -41,14 +41,21 @@ shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
 
+OPENSSL_CONFIG=${BASEDIR}/../etc/openssl.cnf
+KEY_FILE=${DEPOT_DIR}/private/${CN}-${TYPE}.key
+CSR_FILE=${DEPOT_DIR}/${CN}-${TYPE}.csr
+CRT_FILE=${DEPOT_DIR}/certs/${CN}-${TYPE}.crt
+
 case "$TYPE" in
     server) OPENSSL_EXTENSION=etcd_server
 	    ;;
 
     client) OPENSSL_EXTENSION=etcd_client
+	   CN=client.${CN}
 	    ;;
 
     peer) OPENSSL_EXTENSION=etcd_peer
+	   CN=peer.${CN}
     	;;
   
   *)
@@ -60,10 +67,6 @@ if [ -z "$CN" ]; then
 	usage
 fi
 
-OPENSSL_CONFIG=${BASEDIR}/../etc/openssl.cnf
-KEY_FILE=${DEPOT_DIR}/private/${CN}-${TYPE}.key
-CSR_FILE=${DEPOT_DIR}/${CN}-${TYPE}.csr
-CRT_FILE=${DEPOT_DIR}/certs/${CN}-${TYPE}.crt
 
 openssl req -config ${OPENSSL_CONFIG} -new -nodes -keyout ${KEY_FILE} -out ${CSR_FILE}
 

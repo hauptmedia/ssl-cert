@@ -1,0 +1,72 @@
+#!/bin/sh
+set -e
+
+usage() {
+	echo Usage: $0 -c CommonName [-d depot directory] [-i ip address to embed in SAN] [-i multiple ips may be specified] 
+    	echo Example: $0 -d /path/to/your/ssl/depot -c coreos-1.example.com -i 8.8.8.8 -i 192.168.3.2
+        exit 0
+}
+
+BASEDIR=$(dirname $0)
+
+# Reset in case getopts has been used previously in the shell.
+OPTIND=1
+
+VALIDITY=3650
+
+# the openssl.cnf file references this variables, to export them here
+export DEPOT_DIR=$(pwd)
+export CN=""
+export SAN="IP:127.0.0.1"
+
+while getopts "d:c:v:i:h" opt; do
+    case "$opt" in
+    h|\?)
+        usage
+	;;
+    i)  SAN="${SAN}, IP:$OPTARG"
+	;;
+    v)  VALIDITY=$OPTARG
+        ;;
+    c)  CN=$OPTARG
+        ;;
+    d)  DEPOT_DIR=$OPTARG
+        ;;
+    esac
+done
+
+shift $((OPTIND-1))
+
+[ "$1" = "--" ] && shift
+
+if [ -z "$CN" ]; then
+	usage
+fi
+
+OPENSSL_CONFIG=${BASEDIR}/../etc/openssl.cnf
+KEY_FILE=${DEPOT_DIR}/private/${CN}-server.key
+CSR_FILE=${DEPOT_DIR}/${CN}-server.csr
+CRT_FILE=${DEPOT_DIR}/certs/${CN}-server.crt
+
+openssl req -config ${OPENSSL_CONFIG} -new -nodes -keyout ${KEY_FILE} -out ${CSR_FILE}
+
+if [ $? -ne 0 ]; then
+    echo "Could not create certificate signing request. Aborting!" 1>&2
+    exit 1
+fi
+
+openssl ca -config ${OPENSSL_CONFIG} -days ${VALIDITY} -extensions etcd_server -out ${CRT_FILE} -infiles ${CSR_FILE}
+  
+if [ $? -ne 0 ]; then
+    echo "Could not create certificate. Aborting!" 1>&2
+    exit 1
+fi
+
+# remove temp cert signing request file
+rm ${CSR_FILE}
+
+openssl x509 -in ${CRT_FILE} -text -noout
+
+echo
+echo Created server certificate in ${CRT_FILE}
+echo Created private key in ${KEY_FILE}

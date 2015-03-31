@@ -44,6 +44,8 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+openssl x509 -in ${DEPOT_DIR}/certs/ca.crt -text -noout
+
 echo
 echo Created certificate authority
 echo Created private key in ${DEPOT_DIR}/private/ca.key

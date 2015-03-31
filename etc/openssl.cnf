@@ -1,20 +1,19 @@
-# etcd OpenSSL configuration file.
 SAN = "IP:127.0.0.1"
 dir = ${ENV::DEPOT_DIR}
 
 [ ca ]
-default_ca = etcd_ca
+default_ca = default_ca 
 
-[ etcd_ca ]
+[ default_ca ]
 certs            = $dir/certs
-certificate      = $dir/certs/etcd-ca.crt
+certificate      = $dir/certs/ca.crt
 crl              = $dir/crl.pem
 crl_dir          = $dir/crl
 crlnumber        = $dir/crlnumber
 database         = $dir/index.txt
 email_in_dn      = no
 new_certs_dir    = $dir/newcerts
-private_key      = $dir/private/etcd-ca.key
+private_key      = $dir/private/ca.key
 serial           = $dir/serial
 RANDFILE         = $dir/private/.rand
 name_opt         = ca_default
@@ -23,9 +22,9 @@ default_days     = 3650
 default_crl_days = 30
 default_md       = sha512
 preserve         = no
-policy           = policy_etcd
+policy           = default_policy
 
-[ policy_etcd ]
+[ default_policy ]
 organizationName    = optional
 commonName          = supplied
 
